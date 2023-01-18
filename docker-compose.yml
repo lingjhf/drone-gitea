@@ -68,8 +68,7 @@ services:
     environment:
       USER_UID: 1000
       USER_GID: 1000
-      GITEA__migrations__SKIP_TLS_VERIFY: "true"
-      GITEA__webhook__SKIP_TLS_VERIFY: "true"
+      GITEA__webhook__ALLOWED_HOST_LIST: "*"
       GITEA__server__DOMAIN: gitea.devserver.cn
       GITEA__server__ROOT_URL: https://gitea.devserver.cn/
       GITEA__server__HTTP_PORT: "3001"
