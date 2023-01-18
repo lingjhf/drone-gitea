@@ -35,7 +35,7 @@ services:
     image: drone/drone:2.16.0
     container_name: drone-service
     environment:
-      DRONE_GITEA_SERVER: http://gitea.devserver.cn
+      DRONE_GITEA_SERVER: http://gitea.devserver.cn #使用http访问gitea，因为使用https导致gitea会校验是不是有关机构授权的证书
       DRONE_GITEA_CLIENT_ID: "fbe9f248-0e09-41e5-bd57-d86f7777e918"
       DRONE_GITEA_CLIENT_SECRET: "gto_fx453ohrbbq2eqm56qf3femtt2e7dookikmnl2yqtvoof3egbwca"
       DRONE_RPC_SECRET: 1344ded25dfc425d8546e5f1fd12b1a4
@@ -71,7 +71,7 @@ services:
       GITEA__migrations__SKIP_TLS_VERIFY: "true"
       GITEA__webhook__SKIP_TLS_VERIFY: "true"
       GITEA__server__DOMAIN: gitea.devserver.cn
-      GITEA__server__ROOT_URL: http://gitea.devserver.cn/
+      GITEA__server__ROOT_URL: https://gitea.devserver.cn/
       GITEA__server__HTTP_PORT: "3001"
       GITEA__database__DB_TYPE: postgres
       GITEA__database__HOST: db:5432
