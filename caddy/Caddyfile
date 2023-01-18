@@ -1,0 +1,44 @@
+*.devserver.cn:443 {
+
+	tls /etc/certs/cert.pem /etc/certs/cert.key 
+
+	@gitea host gitea.devserver.cn
+	handle @gitea {
+		reverse_proxy 172.21.138.55:3001
+	}
+
+	@drone host drone.devserver.cn
+	handle @drone {
+		reverse_proxy 172.21.138.55:3002
+	}
+
+	# root  * /usr/share/caddy
+
+	# file_server
+
+	# reverse_proxy /api/* 172.20.18.117:3000
+
+	# reverse_proxy 172.20.18.117:5173
+}
+
+*.devserver.cn:80 {
+
+	@gitea host gitea.devserver.cn
+	handle @gitea {
+		reverse_proxy 172.21.138.55:3001
+	}
+
+	@drone host drone.devserver.cn
+	handle @drone {
+		reverse_proxy 172.21.138.55:3002
+	}
+
+	# root  * /usr/share/caddy
+
+	# file_server
+
+	# reverse_proxy /api/* 172.20.18.117:3000
+
+	# reverse_proxy 172.20.18.117:5173
+}
+

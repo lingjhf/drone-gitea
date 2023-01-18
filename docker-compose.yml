@@ -5,48 +5,74 @@ networks:
     external: false
 
 services:
-  #   drone-service:
-  #     image: drone/drone:2
-  #     container_name: drone-service
-  #     environment:
-  #       DRONE_GITEA_SERVER:
-  #       DRONE_GITEA_CLIENT_ID: b6e91382-1b36-4fce-8be6-c5a8e32249b0
-  #       DRONE_GITEA_CLIENT_SECRET: gto_yopuqaxk3o7kmyi7rldloargn4vkxzrvnawvg3lcx7orlzfnvxia
-  #       DRONE_RPC_SECRET: 66e2628f3acad269b7528956ffbf6e2b
-  #       DRONE_SERVER_HOST: localhost:7000
-  #       DRONE_SERVER_PROTO: http
-  #     restart: always
-  #     volumes:
-  #       - ./drone:/data
-  #     ports:
-  #       - "7000:80"
-  #     networks:
-  #       - drone_gitea
+  caddy-service:
+    image: localhost/caddy
+    container_name: "caddy-service"
+    build:
+      context: ./caddy
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/data:/data
+  coredns-service:
+    image: localhost/coredns
+    container_name: "coredns-service"
+    build:
+      context: ./coredns
+      dockerfile: Dockerfile
+    restart: always
+    expose:
+      - '53'
+      - '53/udp'
+    ports:
+      - '53:53'
+      - '53:53/udp'
 
-  # drone-runner-service:
-  #   image: drone/drone-runner-docker:1.8.3
-  #   container_name: drone-runner-service
-  #   environment:
-  #     DRONE_RPC_PROTO: http
-  #     DRONE_RPC_HOST: localhost:7000
-  #     DRONE_RPC_SECRET: 66e2628f3acad269b7528956ffbf6e2b
-  #     DRONE_RUNNER_CAPACITY:  2
-  #     DRONE_RUNNER_NAME: my-runner
-  #   restart: always
-  #   volumes:
-  #     - /run/user/1000/podman/podman.sock:/var/run/docker.sock
-  #   networks:
-  #     - drone_gitea
-  #   depends_on:
-  #     - drone-service
-
+  drone-service:
+    image: drone/drone:2.16.0
+    container_name: drone-service
+    environment:
+      DRONE_GITEA_SERVER: http://gitea.devserver.cn
+      DRONE_GITEA_CLIENT_ID: "fbe9f248-0e09-41e5-bd57-d86f7777e918"
+      DRONE_GITEA_CLIENT_SECRET: "gto_fx453ohrbbq2eqm56qf3femtt2e7dookikmnl2yqtvoof3egbwca"
+      DRONE_RPC_SECRET: 1344ded25dfc425d8546e5f1fd12b1a4
+      DRONE_HTTP_BIND: ":3002"
+      DRONE_HTTP_PROTO: http
+      DRONE_SERVER_HOST: drone.devserver.cn
+      DRONE_SERVER_PROTO: http
+    restart: always
+    volumes:
+      - ./drone:/data
+    ports:
+      - "3002:80"
+  drone-runner-service:
+    image: drone/drone-runner-docker:1.8.3
+    container_name: drone-runner-service
+    environment:
+      DRONE_RPC_PROTO: http
+      DRONE_RPC_HOST: drone.devserver.cn
+      DRONE_RPC_SECRET: 1344ded25dfc425d8546e5f1fd12b1a4
+      DRONE_RUNNER_CAPACITY:  2
+      DRONE_RUNNER_NAME: my-runner
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - drone-service
   gitea-service:
     image: gitea/gitea:1.18.0
     container_name: gitea-service
     environment:
       USER_UID: 1000
       USER_GID: 1000
-      # GITEA__server__HTTP_PORT: "3001"
+      GITEA__migrations__SKIP_TLS_VERIFY: "true"
+      GITEA__webhook__SKIP_TLS_VERIFY: "true"
+      GITEA__server__DOMAIN: gitea.devserver.cn
+      GITEA__server__ROOT_URL: http://gitea.devserver.cn/
+      GITEA__server__HTTP_PORT: "3001"
       GITEA__database__DB_TYPE: postgres
       GITEA__database__HOST: db:5432
       GITEA__database__NAME: gitea
@@ -62,7 +88,6 @@ services:
       - "222:22"
     depends_on:
       - db
-
   db:
     image: postgres:14.0
     restart: always
@@ -72,7 +97,5 @@ services:
       POSTGRES_DB: gitea
     networks:
       - drone_gitea
-    ports:
-      - "5432:5432"
     volumes:
       - ./postgres:/var/lib/postgresql/data

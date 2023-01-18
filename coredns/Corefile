@@ -1,0 +1,10 @@
+.:53 {
+
+    hosts {
+        172.21.138.55  gitea.devserver.cn
+        172.21.138.55  drone.devserver.cn
+        fallthrough
+    }
+    forward . 8.8.8.8 9.9.9.9
+    log
+}

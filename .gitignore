@@ -2,3 +2,4 @@ drone
 drone-runner
 gitea
 postgres
+caddy/data
